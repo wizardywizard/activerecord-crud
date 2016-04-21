@@ -56,8 +56,11 @@ describe 'Movie' do
   describe 'CRUD' do
     describe 'create' do
       it 'can be instantiated and then saved' do
-        expect(Movie.any_instance).to receive(:new)
-        expect(Movie.any_instance).to receive(:save)
+        # A bit of a hack to check that .new has been received
+        movie = Movie.new
+
+        expect(Movie).to receive(:new).and_return(movie)
+        expect(movie).to receive(:save)
 
         can_be_instantiated_and_then_saved
       end
@@ -68,14 +71,14 @@ describe 'Movie' do
       end
 
       it 'can be created in a block' do
-        movie = can_be_created_in_a_block do |movie|
+        movie = can_be_created_in_a_block do |m|
           m.title = "Home Alone"
           m.release_date = 1990
         end
 
         expect(Movie.last).to eq(movie)
         expect(Movie.last.title).to eq("Home Alone")
-        expect(Movie.last.release_date).to eq(1990)
+        expect(Movie.last.release_date.to_i).to eq(1990)
       end
     end
 
@@ -92,13 +95,13 @@ describe 'Movie' do
 
       it 'can count the number of movies' do
         expect(Movie).to receive(:count)
-        can_get_size_of_the_database
+        can_count_the_number_of_movies
       end
 
       it 'can find by id' do
         movie = Movie.find_or_create_by(id: 1, title: "Title")
         expect(Movie).to receive(:find)
-        expect(can_find_by_id(1)).to eq(movie)
+        can_find_by_id(1)
       end
 
       it 'can find by multiple attributes' do
@@ -135,9 +138,10 @@ describe 'Movie' do
         }
         movie = Movie.create(attrs)
 
-        expect {
-          can_be_found_updated_and_saved(attrs, 'New Title')
-        }.to change(movie, :title).to('New Title')
+        can_be_found_updated_and_saved(attrs, 'New Title')
+
+        expect(Movie.find_by(attrs)).to be_nil
+        expect(Movie.find_by(title: "New Title")).to eq(movie)
       end
 
       it 'can be updated using #update' do
@@ -153,25 +157,25 @@ describe 'Movie' do
           Movie.create(title: 'my movie')
         end
 
-        can_update_multiple_items_at_once
+        can_update_all_records_at_once('your movie')
 
-        expect(Movie.where(title: "my movie").size).to eq(5)
+        expect(Movie.where(title: "your movie").size).to eq(Movie.count)
       end
     end
 
     describe 'destroy' do
-      it 'can destroy a single item' do
+      it 'can destroy a single record' do
         movie = Movie.create(title: 'moviemovie')
 
         expect {
-          can_destroy_a_single_item(movie)
+          can_destroy_a_single_record(movie)
         }.to change(Movie, :count).by (-1)
 
         expect(Movie.find_by(title: "moviemovie")).to be_nil
       end
 
-      it 'can destroy all items at once' do
-        can_destroy_all_items_at_once
+      it 'can destroy all records at once' do
+        can_destroy_all_records_at_once
         expect(Movie.count).to eq(0)
       end
     end

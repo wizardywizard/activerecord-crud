@@ -11,19 +11,16 @@ end
 RSpec.configure do |config|
 
   config.include Rack::Test::Methods
-  DatabaseCleaner.strategy = :truncation
-
-  config.before do
-    DatabaseCleaner.clean
+  config.before(:suite) do
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.clean_with(:truncation)
   end
 
-  config.after do
-    DatabaseCleaner.clean
+  config.around(:each) do |spec|
+    DatabaseCleaner.cleaning do
+      spec.run
+    end
   end
 
   config.order = 'default'
-end
-
-def __
-  raise "Replace __ with test code."
 end

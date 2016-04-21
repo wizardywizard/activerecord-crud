@@ -4,8 +4,8 @@ source "https://rubygems.org"
 # gem "rails"
 
 gem 'sinatra'
-gem 'activerecord', :require => 'active_record'
-gem 'sinatra-activerecord', :require => 'sinatra/activerecord'
+gem 'activerecord'
+gem 'sinatra-activerecord'
 gem 'rake'
 gem 'require_all'
 gem 'sqlite3'
@@ -17,5 +17,5 @@ group :test do
   gem 'rspec'
   gem 'capybara'
   gem 'rack-test'
-  gem 'database_cleaner', git: 'https://github.com/bmabey/database_cleaner.git'
+  gem 'database_cleaner'
 end
